@@ -481,6 +481,10 @@ static xlat_action_t xlat_cmp_op(TALLOC_CTX *ctx, fr_dcursor_t *out,
 
 	MEM(dst = fr_value_box_alloc(ctx, FR_TYPE_BOOL, attr_expr_bool_enum));
 
+	REDEBUG("CMP LHS %pV", &a->vb_group);
+	REDEBUG("CMP OP %s", fr_tokens[op]);
+	REDEBUG("CMP RHS %pV", &b->vb_group);
+
 	rcode = fr_value_calc_list_cmp(dst, dst, &a->vb_group, op, &b->vb_group);
 	if (rcode < 0) {
 		talloc_free(dst);
