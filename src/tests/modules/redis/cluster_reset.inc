@@ -41,10 +41,10 @@ if ("$ENV{REDIS_CLUSTER_CONTROL}" == '') {
 #
 #  Reset the cluster
 #
-&Tmp-String-0 := %exec(%{control.Tmp-String-8}, stop)
-&Tmp-String-0 := %exec(%{control.Tmp-String-8}, clean)
-&Tmp-String-0 := %exec(%{control.Tmp-String-8}, start)
-&Tmp-String-0 := %exec(%{control.Tmp-String-8}, create)
+%exec(%{control.Tmp-String-8}, stop)
+%exec(%{control.Tmp-String-8}, clean)
+%exec(%{control.Tmp-String-8}, start)
+%exec(%{control.Tmp-String-8}, create)
 
 #
 #  Determine when initial synchronisation has been completed
@@ -66,19 +66,19 @@ foreach &control.Tmp-Integer-0 {
 	#
 	#  Force a remap as the slaves don't show up in the cluster immediately
 	#
-	if ("%(redis.remap:%{Tmp-String-0}:30001)" == 'success') {
+	if (%redis.remap(%{Tmp-String-0}:30001) == 'success') {
 		#  Hashes to Redis cluster node master 0 (1)
-		if (("%(redis:SET b "%{control.Tmp-String-0}")" == 'OK') && \
-		    ("%(redis:SET c "%{control.Tmp-String-1}")" == 'OK') && \
-		    ("%(redis:SET d "%{control.Tmp-String-2}")" == 'OK')) {
+		if ((%redis('SET','b',"%{control.Tmp-String-0}") == 'OK') && \
+		    (%redis('SET','c',"%{control.Tmp-String-1}") == 'OK') && \
+		    (%redis('SET','d',"%{control.Tmp-String-2}") == 'OK')) {
 			#
 			#  The actual node to keyslot mapping seems to be somewhat random
 			#  so we now need to figure out which slave each of those keys
 			#  ended up on.
 			#
-			if (("%(redis:-@%(redis.node:b 1) GET b)" == "%{control.Tmp-String-0}") && \
-			    ("%(redis:-@%(redis.node:c 1) GET c)" == "%{control.Tmp-String-1}") && \
-			    ("%(redis:-@%(redis.node:d 1) GET d)" == "%{control.Tmp-String-2}")) {
+			if ((%redis("-@%redis.node('b','1')",'GET','b') == &control.Tmp-String-0) && \
+			    (%redis("-@%redis.node('c','1')",'GET','c') == &control.Tmp-String-1) && \
+			    (%redis("-@%redis.node('d','1')",'GET','d') == &control.Tmp-String-2)) {
 				break
 			}
 		}
@@ -90,7 +90,7 @@ foreach &control.Tmp-Integer-0 {
 	#
 	# The cluster tends to come up within a couple of seconds, but it takes longer
 	# for the replicas to be displayed in cluster slot output (usually ~5 seconds).
-	%(delay:0.5)
+	%delay(0.5)
 
 	#
 	#  If the cluster is still not behaving
